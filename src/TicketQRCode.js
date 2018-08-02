@@ -20,10 +20,10 @@ export default class TicketQRCode extends React.Component {
     title: `QR CODE`,
   };
 
-  DEFAULT_POOL_TRY_LIMIT = 10;
+  DEFAULT_POLL_TRY_LIMIT = 10;
   state = {
-    poolTry: 0,
-    poolTryLimit: this.DEFAULT_POOL_TRY_LIMIT
+    pollTry: 0,
+    pollTryLimit: this.DEFAULT_POLL_TRY_LIMIT
   }
   qrCode = undefined;
   transferInfo = {
@@ -35,12 +35,12 @@ export default class TicketQRCode extends React.Component {
     transferNameTo: undefined,
     transferResult: undefined,
   }
-  poolInfo = {
-    poolTry: 0,
-    poolTryLimit: this.DEFAULT_POOL_TRY_LIMIT
+  pollInfo = {
+    pollTry: 0,
+    pollTryLimit: this.DEFAULT_POLL_TRY_LIMIT
   }
   isPushedAllowance = false;
-  allowPooling = false;
+  allowPolling = false;
 
   /*** DATA FUNCTIONS ***/
   // Local data
@@ -113,21 +113,21 @@ export default class TicketQRCode extends React.Component {
     }
   }
 
-  // Pooling
+  // Polling
   // TODO: extract as module
-  setGetTransferInfoPooling() {
-    this.setPoolDefaultValue();
+  setGetTransferInfoPolling() {
+    this.setPollDefaultValue();
     this.runPolling();
   }
-  setPoolDefaultValue = () => {
-    this.allowPooling = true;
+  setPollDefaultValue = () => {
+    this.allowPolling = true;
     this.setState({
-      poolTry: 0,
-      poolTryLimit: this.DEFAULT_POOL_TRY_LIMIT
+      pollTry: 0,
+      pollTryLimit: this.DEFAULT_POLL_TRY_LIMIT
     });
   }
-  setPoolStopValue = () => {
-    this.allowPooling = false;
+  setPollStopValue = () => {
+    this.allowPolling = false;
   }
   getPollForFindReceiverInfo = () => {
     const id = this.transferInfo.transferId;
@@ -151,12 +151,12 @@ export default class TicketQRCode extends React.Component {
     }
     let p = generator.next();
     p.value.then( (data) => {
-      if( !this.allowPooling ) return;
+      if( !this.allowPolling ) return;
       data = Array.from(data.rows).map(this.formatTransferData)[0];
       console.log('data.idTo', data.idTo);
-      let poolTry = this.state.poolTry;
-      let poolTryLimit = this.state.poolTryLimit;
-      if( poolTryLimit <= 0 ) {
+      let pollTry = this.state.pollTry;
+      let pollTryLimit = this.state.pollTryLimit;
+      if( pollTryLimit <= 0 ) {
         this.watingTimeoverAlert('Timeout');
         return;
       }
@@ -164,9 +164,9 @@ export default class TicketQRCode extends React.Component {
       // check there is apply to transfer by idTo value
       if( !data || data.idTo === null ) {
         setTimeout( () => {
-        poolTry += 1;
-        poolTryLimit -= 1;
-        this.setState({poolTry, poolTryLimit});
+        pollTry += 1;
+        pollTryLimit -= 1;
+        this.setState({pollTry, pollTryLimit});
         this.runPolling(generator);
       }, 1000);
       } else {
@@ -184,7 +184,7 @@ export default class TicketQRCode extends React.Component {
       [
         {
           text: `Keep Waiting`, 
-          onPress: () => this.setGetTransferInfoPooling()
+          onPress: () => this.setGetTransferInfoPolling()
         },
         {
           text: `Cancel`, 
@@ -252,16 +252,16 @@ export default class TicketQRCode extends React.Component {
 
     this.qrCode = this.getQrCode();
 
-    this.setGetTransferInfoPooling();
+    this.setGetTransferInfoPolling();
   }
   componentWillUnmount () {
     console.log('componentWillUnmount');
-    this.setPoolStopValue();
+    this.setPollStopValue();
     this.approvalTransfer(false, undefined);
   }
 
   render() {
-    const { poolTryLimit } = this.state;
+    const { pollTryLimit } = this.state;
     const qrCode = this.qrCode;
     const { ticketId }  = this.transferInfo;
     return (
@@ -277,7 +277,7 @@ export default class TicketQRCode extends React.Component {
             />
           </View>
         )}
-        <Text>Wating {poolTryLimit}</Text>
+        <Text>Wating {pollTryLimit}</Text>
       </View>
     );
   }

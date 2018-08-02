@@ -22,18 +22,18 @@ export default class TicketQRCodeReader extends Component {
     title: `QR CODE Reader`,
   };
 
-  DEFAULT_POOL_TRY_LIMIT = 10;
-  allowPooling = false;
+  DEFAULT_POLL_TRY_LIMIT = 10;
+  allowPolling = false;
   state = {
     hasCameraPermission: undefined,
     lastScannedUrl: undefined,
     hasRead: undefined,
     userId: undefined,
     transferId: undefined,
-    isPoolOn: false,
+    isPollOn: false,
     allowance: undefined,
-    poolTry: 0,
-    poolTryLimit: this.DEFAULT_POOL_TRY_LIMIT,
+    pollTry: 0,
+    pollTryLimit: this.DEFAULT_POLL_TRY_LIMIT,
     newTicket: {
       ticketId: undefined,
       onwerId: undefined,
@@ -145,28 +145,28 @@ export default class TicketQRCodeReader extends Component {
           })
         }
       ).then( response => response.json() );
-      this.setGetTransferInfoPooling();
-      this.setState({isPoolOn:true});
+      this.setGetTransferInfoPolling();
+      this.setState({isPollOn:true});
     } catch (err) {
       console.error(err);
     }
   }
 
-  // Pooling
+  // Polling
   // TODO: extract as module
-  setGetTransferInfoPooling() {
-    this.setPoolDefaultValue();
+  setGetTransferInfoPolling() {
+    this.setPollDefaultValue();
     this.runPolling();
   }
-  setPoolDefaultValue = () => {
-    this.allowPooling = true;
+  setPollDefaultValue = () => {
+    this.allowPolling = true;
     this.setState({
-      poolTry: 0,
-      poolTryLimit: this.DEFAULT_POOL_TRY_LIMIT
+      pollTry: 0,
+      pollTryLimit: this.DEFAULT_POLL_TRY_LIMIT
     });
   }
-  setPoolStopValue = () => {
-    this.allowPooling = false;
+  setPollStopValue = () => {
+    this.allowPolling = false;
   }
   getPollForFindReceiverInfo = () => {
     const id = this.state.transferId;
@@ -186,11 +186,11 @@ export default class TicketQRCodeReader extends Component {
     }
     let p = generator.next();
     p.value.then( (data) => {
-      if( !this.allowPooling ) return;
+      if( !this.allowPolling ) return;
       const formatedData = Array.from(data.rows).map(this.formatTransferData)[0];
-      let poolTry = this.state.poolTry;
-      let poolTryLimit = this.state.poolTryLimit;
-      if( poolTryLimit <= 0 ) {
+      let pollTry = this.state.pollTry;
+      let pollTryLimit = this.state.pollTryLimit;
+      if( pollTryLimit <= 0 ) {
         this.watingTimeoverAlert('Timeout');
         return;
       }
@@ -198,9 +198,9 @@ export default class TicketQRCodeReader extends Component {
       // check there is approval to transfer by allowance value
       if( !formatedData || formatedData.allowance === null ) {
         setTimeout( () => {
-        poolTry += 1;
-        poolTryLimit -= 1;
-        this.setState({poolTry, poolTryLimit});
+        pollTry += 1;
+        pollTryLimit -= 1;
+        this.setState({pollTry, pollTryLimit});
         this.runPolling(generator);
       }, 1000);
       } else {
@@ -247,7 +247,7 @@ export default class TicketQRCodeReader extends Component {
       [
         {
           text: `Keep Waiting`, 
-          onPress: () => this.setGetTransferInfoPooling()
+          onPress: () => this.setGetTransferInfoPolling()
         },
         {
           text: `Cancel`, 
@@ -267,11 +267,11 @@ export default class TicketQRCodeReader extends Component {
   }
   componentWillUnmount () {
     console.log('componentWillUnmount');
-    this.setPoolStopValue();
+    this.setPollStopValue();
   }
 
   render() {
-    const { isPoolOn, hasCameraPermission } = this.state;
+    const { isPollOn, hasCameraPermission } = this.state;
     return (
       <View style={styles.container}>
         { hasCameraPermission === null
@@ -280,7 +280,7 @@ export default class TicketQRCodeReader extends Component {
               ? <Text style={{ color: '#fff' }}>
                   Camera permission is not granted
                 </Text>
-              : !isPoolOn ? 
+              : !isPollOn ? 
                 (
                   <BarCodeScanner
                     onBarCodeRead={this.handleBarCodeRead}
