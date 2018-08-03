@@ -38,7 +38,7 @@ export default class TicketMain extends React.Component {
         console.log('json', json);
         const title = 'Delete Result';
         const text = `Deleted ${json.rowCount} ticket(s)`;
-        this.SimpleAlert(title, text);
+        this.simpleAlert(title, text);
       })
       .catch( err => console.error(err) );
   }
@@ -62,23 +62,20 @@ export default class TicketMain extends React.Component {
         console.log('json', json);
         const title = 'Delete Result';
         const text = `Deleted ${json.rowCount} transfer(s)`;
-        this.SimpleAlert(title, text);
+        this.simpleAlert(title, text);
       })
       .catch( err => console.error(err) );
   }
 
   /*** UI Handlers ***/
-  SimpleAlert(title, text) {
+  simpleAlert = (title, content, fns = { text: 'Close', onPress: false }, cancelable = true) => {
+    if (typeof actionFn !== 'funciton') actionFn = false;
+    if (typeof cancelFn !== 'funciton') cancelFn = false;
     Alert.alert(
       title,
-      text,
-      [
-        {
-          text: `Close`, 
-          onPress: () => false
-        },
-      ],
-      { cancelable: true}
+      content,
+      [ fns ],
+      { cancelable: cancelable }
     );
   }
 
