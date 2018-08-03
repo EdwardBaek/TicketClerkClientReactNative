@@ -9,6 +9,7 @@ import {
   Button
 } from 'react-native';
 import { BarCodeScanner, Permissions } from 'expo';
+import axios from 'axios';
 
 import { 
   BASE_URL, 
@@ -116,8 +117,7 @@ export default class TicketQRCodeReader extends Component {
     try {
       const URL = BASE_URL + API_TICKET_DETAIL + ticketId;
       console.log('URL', URL);
-      return result = await fetch(URL)
-        .then(response => response.json())
+      return await axios.get(URL).then(res=>res.data)
         .then( json => {
           const ticket = Array.from(json.rows).map(this.formatTicketData)[0];
           return ticket;
@@ -132,19 +132,8 @@ export default class TicketQRCodeReader extends Component {
       const URL = BASE_URL + API_TICKET_TRANSFER_APPLY;
       const idTo = this.state.userId;
       console.log('URL', URL);
-      await fetch(URL, 
-        {
-          method: 'PUT',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            id: transferId,
-            idTo
-          })
-        }
-      ).then( response => response.json() );
+      await axios.put(URL,{id: transferId, idTo});
+
       this.setGetTransferInfoPolling();
       this.setState({isPollOn:true});
     } catch (err) {
@@ -178,9 +167,8 @@ export default class TicketQRCodeReader extends Component {
     console.log('URL', URL);
     return function *poll () {
       while(true) {
-        yield fetch(URL)
-          .then( (response) => response.json() )
-          .catch(err => console.log(err))
+        yield axios.get(URL).then(res=>res.data)
+          .catch(err => console.log(err));
       }
     }
   }

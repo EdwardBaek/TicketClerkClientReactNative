@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Alert
 } from 'react-native';
+import axios from 'axios';
 
 import { 
   BASE_URL, 
@@ -22,44 +23,19 @@ export default class TicketMain extends React.Component {
   deleteTicketList = () => {
     const URL = BASE_URL + API_TICKET_LIST_DELETE_ALL;
     console.log('URL', URL);
-    fetch(URL,
-        {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      )
-      .then(response => {
-        console.log('respoonse', response);
-        return response.json();
-      })
+    axios.delete(URL).then(res=>res.data)
       .then( json => {
-        console.log('json', json);
         const title = 'Delete Result';
         const text = `Deleted ${json.rowCount} ticket(s)`;
         this.simpleAlert(title, text);
-      })
-      .catch( err => console.error(err) );
+      }).catch( err => console.error(err) );
   }
 
   deleteTransferList = () => {
     const URL = BASE_URL + API_TICKET_TRANSFER_LIST_DELETE_ALL;
     console.log('URL', URL);
-    fetch(URL,
-        {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      )
-      .then(response => {
-        console.log('respoonse', response);
-        return response.json();
-      })
+    axios.delete(URL).then(res=>res.data)
       .then( json => {
-        console.log('json', json);
         const title = 'Delete Result';
         const text = `Deleted ${json.rowCount} transfer(s)`;
         this.simpleAlert(title, text);

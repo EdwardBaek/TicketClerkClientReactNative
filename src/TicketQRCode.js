@@ -7,6 +7,7 @@ import {
   Text,
   Alert
 } from 'react-native';
+import axios from 'axios';
 
 import { 
   BASE_URL, 
@@ -67,21 +68,10 @@ export default class TicketQRCode extends React.Component {
     try {
       const URL = BASE_URL + API_TICKET_TRANSFER_NEW;
       console.log('URL', URL);
-      const response = await fetch(URL, 
-        {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            userId,
-            ticketId
-          })
-        }
-      );
-      const json = await response.json();
-      return Array.from(json.rows).map(this.formatTransferData)[0];
+      return await axios.post(URL, {ticketId, userId})
+          .then(res=>res.data)
+          .then(json=> Array.from(json.rows).map(this.formatTransferData)[0])
+          .catch(err=>console.log(err));
     } catch (err) {
       console.error(err);
     }
@@ -93,21 +83,13 @@ export default class TicketQRCode extends React.Component {
       const transferId = this.transferInfo.transferId;
       const URL = BASE_URL + API_TICKET_TRANSFER_APPROVAL;
       console.log('URL', URL);
-      await fetch(URL, 
-        {
-          method: 'PUT',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            id: transferId,
-            allowance
-          })
-        }
-      ).then( response => response.json() );
-      if ( typeof alert === 'function' )
-        alert();
+      axios.put(URL, {id: transferId, allowance})
+        .then(res=>res.data)
+        .then( json => {
+          if ( typeof alert === 'function' )
+            alert();
+          console.log(json);
+        })
     } catch (err) {
       console.error(err);
     }
@@ -140,9 +122,9 @@ export default class TicketQRCode extends React.Component {
     return function *poll () {
       while(true) {
         try {
-          yield fetch(URL)
-            .then( (response) => response.json() )
-            .catch(err => console.log(err))
+          yield axios(URL)
+            .then(res => res.data)
+            .catch(err=> console.log(err));
         } catch (err) {
           console.error('transferDetail', err);
         }

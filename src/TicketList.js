@@ -8,6 +8,7 @@ import {
   TouchableOpacity 
 } from 'react-native';
 import Modal from 'react-native-modal';
+import axios from 'axios';
 
 import { 
   BASE_URL, 
@@ -70,60 +71,33 @@ export default class TicketList extends React.Component {
   getTicketList = (userId) => {
     const URL = BASE_URL + API_TICKET_LIST_BY_USER + userId;
     console.log('URL', URL);
-    fetch(URL)
-      .then(response => response.json())
-      .then( json => {
-        const ticketList = Array.from(json.rows).map(this.formatTicketData);
-        this.setState({
-          tickets: ticketList,
-          isLoaded: true
-        });
-      }).catch( err => console.error(err) );
+    axios.get(URL).then( res => res.data).then( json => {
+      const ticketList = Array.from(json.rows).map(this.formatTicketData);
+      this.setState({
+        tickets: ticketList,
+        isLoaded: true
+      });
+    }).catch( err => console.error(err) );
   }
 
   issueNewTicket = (userId) => {
     const URL = BASE_URL + API_TICKET_NEW;
     console.log('URL', URL);
-    fetch(URL,
-        {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            userId
-          })
-        }
-      )
-      .then(response => response.json())
-      .then( json => {
-        const tickets = this.state.tickets;
-        const newTicket = Array.from(json.rows).map(this.formatTicketData)[0];
-        this.setState({
-          tickets: [...tickets, newTicket]
-        });
-      }).catch( err => console.error(err) );
+    axios.post(URL, {userId}).then(res => res.data).then( json => {
+      const tickets = this.state.tickets;
+      const newTicket = Array.from(json.rows).map(this.formatTicketData)[0];
+      this.setState({
+        tickets: [...tickets, newTicket]
+      });
+    }).catch( err => console.error(err) );
   }
 
   deleteTicket = (ticketId) => {
     const URL = BASE_URL + API_TICKET;
-    fetch(URL,
-        {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            ticketId
-          })
-        }
-      )
-      .then(response => {
-          return response.json();
-        }
-      )
-      .then( json => {
+    console.log('URL', URL);
+    axios.delete(URL, {data: {ticketId}})
+      .then(res => res.data)
+      .then(json => {
         const deletedTicket = Array.from(json.rows).map(this.formatTicketData)[0];
         const tickets = this.state.tickets.filter( (ticket) => ticket.ticketId !== deletedTicket.ticketId);
         this.setState({
