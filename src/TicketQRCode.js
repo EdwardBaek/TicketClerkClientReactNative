@@ -114,10 +114,14 @@ export default class TicketQRCode extends React.Component {
   }
 
   // Polling
-  // TODO: extract as module
+  // TODO: extract
   setGetTransferInfoPolling() {
     this.setPollDefaultValue();
-    this.runPolling();
+    this.runPolling(
+      undefined, 
+      this.approvalAlert, 
+      this.watingTimeoverAlert
+    );
   }
   setPollDefaultValue = () => {
     this.allowPolling = true;
@@ -145,10 +149,11 @@ export default class TicketQRCode extends React.Component {
       }
     }
   }
-  runPolling = (generator) => {
+  runPolling = (generator, successFn, waitngFn) => {
     if(!generator) {
       generator = this.getPollForFindReceiverInfo()();
     }
+
     let p = generator.next();
     p.value.then( (data) => {
       if( !this.allowPolling ) return;
@@ -157,7 +162,8 @@ export default class TicketQRCode extends React.Component {
       let pollTry = this.state.pollTry;
       let pollTryLimit = this.state.pollTryLimit;
       if( pollTryLimit <= 0 ) {
-        this.watingTimeoverAlert('Timeout');
+        if( typeof waitngFn === 'function' )
+          waitngFn('Timeout');
         return;
       }
 
@@ -167,11 +173,12 @@ export default class TicketQRCode extends React.Component {
         pollTry += 1;
         pollTryLimit -= 1;
         this.setState({pollTry, pollTryLimit});
-        this.runPolling(generator);
+        this.runPolling(generator, successFn, waitngFn);
       }, 1000);
       } else {
         console.log('checked apply',data);
-        this.approvalAlert(`To ${data.idTo}/${data.nameTo}`);
+        if( typeof successFn === 'function' )
+          successFn(`To ${data.idTo}/${data.nameTo}`);
       }
     });
   }

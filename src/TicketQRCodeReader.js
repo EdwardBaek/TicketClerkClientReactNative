@@ -153,10 +153,14 @@ export default class TicketQRCodeReader extends Component {
   }
 
   // Polling
-  // TODO: extract as module
+  // TODO: extract
   setGetTransferInfoPolling() {
     this.setPollDefaultValue();
-    this.runPolling();
+    this.runPolling(
+      undefined,
+      this.resultAlert,
+      this.watingTimeoverAlert
+    );
   }
   setPollDefaultValue = () => {
     this.allowPolling = true;
@@ -180,7 +184,7 @@ export default class TicketQRCodeReader extends Component {
       }
     }
   }
-  runPolling = (generator) => {
+  runPolling = (generator, successFn, waitngFn) => {
     if(!generator) {
       generator = this.getPollForFindReceiverInfo()();
     }
@@ -191,7 +195,8 @@ export default class TicketQRCodeReader extends Component {
       let pollTry = this.state.pollTry;
       let pollTryLimit = this.state.pollTryLimit;
       if( pollTryLimit <= 0 ) {
-        this.watingTimeoverAlert('Timeout');
+        if( typeof waitngFn === 'function' )
+          waitngFn('Timeout');
         return;
       }
 
@@ -201,7 +206,7 @@ export default class TicketQRCodeReader extends Component {
         pollTry += 1;
         pollTryLimit -= 1;
         this.setState({pollTry, pollTryLimit});
-        this.runPolling(generator);
+        this.runPolling(generator, successFn, waitngFn);
       }, 1000);
       } else {
         const ticketId = formatedData.ticketId;
@@ -215,7 +220,8 @@ export default class TicketQRCodeReader extends Component {
           issueTime
         }
         this.setState({ newTicket: ticket });
-        this.resultAlert(formatedData.allowance);
+        if( typeof successFn === 'function' )
+          successFn(formatedData.allowance);
       }
     });
   }
