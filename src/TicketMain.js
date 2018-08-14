@@ -10,7 +10,7 @@ import axios from 'axios';
 
 import { 
   BASE_URL, 
-  API_TICKET_LIST_DELETE_ALL, 
+  API_TICKETS, 
   API_TICKET_TRANSFER_LIST_DELETE_ALL, 
 } from './api'
 
@@ -21,7 +21,7 @@ export default class TicketMain extends React.Component {
 
   /*** DATA FUNCTIONS ***/
   deleteTicketList = () => {
-    const URL = BASE_URL + API_TICKET_LIST_DELETE_ALL;
+    const URL = BASE_URL + API_TICKETS;
     console.log('URL', URL);
     axios.delete(URL).then(res=>res.data)
       .then( json => {

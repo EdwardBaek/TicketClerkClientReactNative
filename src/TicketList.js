@@ -12,9 +12,8 @@ import axios from 'axios';
 
 import { 
   BASE_URL, 
-  API_TICKET_LIST_BY_USER, 
-  API_TICKET, 
-  API_TICKET_NEW 
+  API_TICKETS,
+  API_TICKETS_BY_USER
 } from './api'
 
 const MODAL_TYPES = {
@@ -69,7 +68,7 @@ export default class TicketList extends React.Component {
 
   // Network
   getTicketList = (userId) => {
-    const URL = BASE_URL + API_TICKET_LIST_BY_USER + userId;
+    const URL = BASE_URL + API_TICKETS_BY_USER + userId;
     console.log('URL', URL);
     axios.get(URL).then( res => res.data).then( json => {
       const ticketList = Array.from(json.rows).map(this.formatTicketData);
@@ -81,7 +80,7 @@ export default class TicketList extends React.Component {
   }
 
   issueNewTicket = (userId) => {
-    const URL = BASE_URL + API_TICKET_NEW;
+    const URL = BASE_URL + API_TICKETS;
     console.log('URL', URL);
     axios.post(URL, {userId}).then(res => res.data).then( json => {
       const tickets = this.state.tickets;
@@ -93,9 +92,9 @@ export default class TicketList extends React.Component {
   }
 
   deleteTicket = (ticketId) => {
-    const URL = BASE_URL + API_TICKET;
+    const URL = BASE_URL + API_TICKETS + '/' + ticketId;
     console.log('URL', URL);
-    axios.delete(URL, {data: {ticketId}})
+    axios.delete(URL)
       .then(res => res.data)
       .then(json => {
         const deletedTicket = Array.from(json.rows).map(this.formatTicketData)[0];
