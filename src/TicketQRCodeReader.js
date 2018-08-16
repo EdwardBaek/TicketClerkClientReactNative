@@ -13,9 +13,9 @@ import axios from 'axios';
 
 import { 
   BASE_URL, 
-  API_TICKET_TRANSFER_DETAIL_BY_ID, 
-  API_TICKET_TRANSFER_APPLY,
-  API_TICKET_DETAIL
+  API_TICKETS,
+  API_TRANSFER,
+  API_TRANSFER_APPLY,
 } from './api'
 
 export default class TicketQRCodeReader extends Component {
@@ -115,7 +115,7 @@ export default class TicketQRCodeReader extends Component {
   // Network
   getTicketDetail = async (ticketId) => {
     try {
-      const URL = BASE_URL + API_TICKET_DETAIL + ticketId;
+      const URL = BASE_URL + API_TICKETS + '/' + ticketId;
       console.log('URL', URL);
       return await axios.get(URL).then(res=>res.data)
         .then( json => {
@@ -129,7 +129,7 @@ export default class TicketQRCodeReader extends Component {
   }
   handleApplyTransfer = async (transferId) => {
     try {
-      const URL = BASE_URL + API_TICKET_TRANSFER_APPLY;
+      const URL = BASE_URL + API_TRANSFER_APPLY;
       const idTo = this.state.userId;
       console.log('URL', URL);
       await axios.put(URL,{id: transferId, idTo});
@@ -163,7 +163,7 @@ export default class TicketQRCodeReader extends Component {
   }
   getPollForFindReceiverInfo = () => {
     const id = this.state.transferId;
-    const URL = BASE_URL + API_TICKET_TRANSFER_DETAIL_BY_ID + id;
+    const URL = BASE_URL + API_TRANSFER + '/' + id;
     console.log('URL', URL);
     return function *poll () {
       while(true) {
